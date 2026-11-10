@@ -1,0 +1,50 @@
+---
+import ProjectDemo from './demos/ProjectDemo.astro';
+import StatusBadge from './StatusBadge.astro';
+import Chips from './Chips.astro';
+import { useUi, projectUrl, type Lang } from '../i18n/ui';
+import type { Project } from '../lib/projects';
+
+interface Props { lang: Lang; project: Project; index?: number }
+const { lang, project, index = 0 } = Astro.props;
+const { data, slug } = project;
+const t = useUi(lang).project;
+const href = projectUrl(lang, slug);
+---
+<div class="reveal h-full" style={`--i:${index % 2}`}>
+  <article data-tilt class="tilt flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface hover:border-accent/70 hover:shadow-xl">
+    <a href={href} tabindex="-1" aria-hidden="true" class="block p-3 pb-0">
+      <ProjectDemo slug={slug} class="aspect-[16/10] w-full overflow-hidden rounded-xl bg-surface-2" />
+    </a>
+    <div class="relative flex flex-1 flex-col gap-4 p-5 sm:p-6">
+      <div class="flex items-center justify-between gap-3">
+        <StatusBadge lang={lang} status={data.status} />
+        <span class="font-mono text-xs text-muted">{data.year}</span>
+      </div>
+      <div>
+        <h3 class="font-display text-2xl font-bold tracking-tight">
+          <a href={href} class="after:absolute after:inset-0 after:content-['']">{data.title}</a>
+        </h3>
+        <p class="mt-2 text-base leading-relaxed text-muted">{data.tagline}</p>
+      </div>
+      <ul class="flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-ink">
+        {data.highlights.slice(0, 3).map((h) => <li class="before:mr-1.5 before:text-accent before:content-['▸']">{h}</li>)}
+      </ul>
+      <Chips items={data.stack.slice(0, 5)} class="mt-auto" />
+      {data.status === 'wip' ? (
+        <p class="border-l-2 border-wip pl-3 text-sm leading-relaxed text-muted">
+          <strong class="font-semibold text-ink">{t.notTestable}</strong> {data.goal}
+        </p>
+      ) : (
+        <div class="relative z-10 flex flex-wrap items-center gap-3">
+          {data.links.live && (
+            <a href={data.links.live} target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center gap-2 rounded-lg bg-ink px-5 font-semibold text-bg transition-transform hover:-translate-y-0.5">
+              {t.try} <span aria-hidden="true">↗</span>
+            </a>
+          )}
+          <span class="text-sm font-medium text-ink underline decoration-accent decoration-2 underline-offset-4">{t.readCase}</span>
+        </div>
+      )}
+    </div>
+  </article>
+</div>

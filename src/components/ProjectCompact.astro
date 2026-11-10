@@ -1,0 +1,23 @@
+---
+import StatusBadge from './StatusBadge.astro';
+import Chips from './Chips.astro';
+import { projectUrl, type Lang } from '../i18n/ui';
+import type { Project } from '../lib/projects';
+
+interface Props { lang: Lang; project: Project; index?: number }
+const { lang, project, index = 0 } = Astro.props;
+const { data, slug } = project;
+---
+<div class="reveal h-full" style={`--i:${index % 3}`}>
+  <article data-tilt class="tilt relative flex h-full flex-col gap-3 rounded-card border border-line bg-surface p-5 hover:border-accent/70">
+    <div class="flex items-center justify-between gap-3">
+      <StatusBadge lang={lang} status={data.status} />
+      <span class="font-mono text-xs text-muted">{data.year}</span>
+    </div>
+    <h3 class="font-display text-xl font-bold tracking-tight">
+      <a href={projectUrl(lang, slug)} class="after:absolute after:inset-0 after:content-['']">{data.title}</a>
+    </h3>
+    <p class="text-sm leading-relaxed text-muted">{data.tagline}</p>
+    <Chips items={data.stack.slice(0, 4)} class="mt-auto" />
+  </article>
+</div>

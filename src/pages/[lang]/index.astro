@@ -1,0 +1,103 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import Section from '../../components/Section.astro';
+import HeroParticles from '../../components/HeroParticles.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import ProjectCompact from '../../components/ProjectCompact.astro';
+import Chips from '../../components/Chips.astro';
+import { languages, useUi, homeUrl, stackData, type Lang } from '../../i18n/ui';
+import { getProjects } from '../../lib/projects';
+import { site } from '../../data/site';
+
+export const getStaticPaths = (() => languages.map((lang) => ({ params: { lang } }))) satisfies GetStaticPaths;
+
+const lang = Astro.params.lang as Lang;
+const t = useUi(lang);
+const projects = await getProjects(lang);
+const featured = projects.filter((p) => p.data.featured);
+const others = projects.filter((p) => !p.data.featured);
+const alternates = { fr: homeUrl('fr'), en: homeUrl('en') };
+const groups = (['ml', 'web', 'mobile', 'data'] as const).map((k) => ({ key: k, label: t.stackGroups[k], items: stackData[k] }));
+const contacts = [
+  { label: t.contact.github, value: `github.com/${site.handle}`, href: site.github },
+  { label: t.contact.linkedin, value: site.linkedin, href: site.linkedin },
+  { label: t.contact.email, value: site.email, href: site.email ? `mailto:${site.email}` : '' }
+];
+---
+<Base lang={lang} title={t.siteTitle} description={t.siteDescription} alternates={alternates}>
+  <section aria-label="Hero" class="mx-auto w-full max-w-6xl px-4 pt-6 sm:px-6 md:pt-10">
+    <div class="h-[45vh] min-h-56 max-h-[55vh] w-full overflow-hidden">
+      <HeroParticles text="Sacha Don" />
+    </div>
+    <div class="mx-auto mt-4 flex max-w-3xl flex-col items-center gap-8 text-center md:mt-6">
+      <p class="font-display text-2xl font-semibold leading-snug tracking-tight sm:text-3xl">{t.hero.pitch}</p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <a href="#projects" class="inline-flex min-h-12 items-center gap-2 rounded-xl bg-accent px-6 text-lg font-semibold text-accent-ink transition-transform hover:-translate-y-0.5">{t.hero.ctaProjects} <span aria-hidden="true">↓</span></a>
+        <a href={site.github} target="_blank" rel="noopener noreferrer" class="inline-flex min-h-12 items-center gap-2 rounded-xl border border-line bg-surface px-6 text-lg font-semibold text-ink transition-colors hover:border-ink">{t.hero.ctaGithub} <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </section>
+
+  <Section id="projects" title={t.sections.featured} lead={t.sections.featuredLead}>
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+      {featured.map((p, i) => <ProjectCard lang={lang} project={p} index={i} />)}
+    </div>
+    <h3 class="reveal mb-6 mt-16 font-display text-2xl font-bold tracking-tight">{t.sections.others}</h3>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {others.map((p, i) => <ProjectCompact lang={lang} project={p} index={i} />)}
+    </div>
+  </Section>
+
+  <Section id="stack" title={t.sections.stack} lead={t.sections.stackLead}>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {groups.map((g, i) => (
+        <div class="reveal rounded-card border border-line bg-surface p-5 sm:p-6" style={`--i:${i % 2}`}>
+          <h3 class="mb-4 font-display text-lg font-bold">{g.label}</h3>
+          <Chips items={g.items} />
+        </div>
+      ))}
+    </div>
+  </Section>
+
+  <Section id="path" title={t.sections.path}>
+    <div class="reveal grid grid-cols-1 gap-8 md:grid-cols-[1fr_1.2fr]">
+      <div>
+        <p class="font-mono text-sm text-accent-2">2026</p>
+        <h3 class="mt-1 font-display text-2xl font-bold tracking-tight">{t.path.title}</h3>
+        <p class="mt-4 max-w-prose text-base leading-relaxed text-muted">{t.path.lead}</p>
+        <p class="mt-4 text-base leading-relaxed">{t.path.note}</p>
+      </div>
+      <div>
+        <h3 class="mb-4 font-mono text-xs uppercase tracking-wider text-muted">{t.path.modulesTitle}</h3>
+        <ol class="grid gap-2 sm:grid-cols-2">
+          {t.path.modules.map((m, i) => (
+            <li class="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm">
+              <span class="font-mono text-xs text-muted">{String(i + 1).padStart(2, '0')}</span>{m}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </Section>
+
+  <Section id="contact" title={t.sections.contact} lead={t.contact.lead}>
+    <ul class="reveal grid grid-cols-1 gap-3 sm:grid-cols-3">
+      {contacts.map((c) => (
+        <li>
+          {c.href ? (
+            <a href={c.href} target={c.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer" class="flex min-h-20 flex-col justify-center rounded-card border border-line bg-surface px-5 py-4 transition-colors hover:border-accent">
+              <span class="font-mono text-xs uppercase tracking-wider text-muted">{c.label}</span>
+              <span class="mt-1 break-all font-medium">{c.value}</span>
+            </a>
+          ) : (
+            <div class="flex min-h-20 flex-col justify-center rounded-card border border-dashed border-line px-5 py-4 text-muted">
+              <span class="font-mono text-xs uppercase tracking-wider">{c.label}</span>
+              <span class="mt-1">{t.contact.todo}</span>
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+  </Section>
+</Base>

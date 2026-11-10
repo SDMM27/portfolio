@@ -1,0 +1,33 @@
+---
+import { useUi, type Lang } from '../i18n/ui';
+import type { Project } from '../lib/projects';
+
+interface Props { lang: Lang; project: Project }
+const { lang, project } = Astro.props;
+const t = useUi(lang).project;
+const { goal, currentStage, next } = project.data;
+---
+<aside aria-labelledby="wip-title" class="rounded-card border-2 border-wip bg-surface p-5 sm:p-7">
+  <div class="flex items-center gap-3">
+    <span class="pulse-dot size-3 rounded-full bg-wip" aria-hidden="true"></span>
+    <h2 id="wip-title" class="font-display text-xl font-bold">{t.notTestableTitle}</h2>
+  </div>
+  <dl class="mt-5 grid grid-cols-1 gap-6 md:grid-cols-3">
+    <div>
+      <dt class="font-mono text-xs uppercase tracking-wider text-muted">{t.goal}</dt>
+      <dd class="mt-2 leading-relaxed">{goal}</dd>
+    </div>
+    <div>
+      <dt class="font-mono text-xs uppercase tracking-wider text-muted">{t.stage}</dt>
+      <dd class="mt-2 leading-relaxed">{currentStage}</dd>
+    </div>
+    <div>
+      <dt class="font-mono text-xs uppercase tracking-wider text-muted">{t.next}</dt>
+      <dd class="mt-2">
+        <ul class="space-y-2 leading-relaxed">
+          {next?.map((n) => <li class="flex gap-2"><span class="text-wip" aria-hidden="true">→</span><span>{n}</span></li>)}
+        </ul>
+      </dd>
+    </div>
+  </dl>
+</aside>

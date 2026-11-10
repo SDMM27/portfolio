@@ -1,16 +1,27 @@
 ---
+// Racine : redirection vers /fr, ou /en selon la langue du navigateur (script), /fr en repli.
 ---
-
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sacha Don</title>
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href="/fr/" />
+    <noscript><meta http-equiv="refresh" content="0; url=/fr/" /></noscript>
+    <script is:inline>
+      var langs = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'fr']);
+      var target = '/fr/';
+      for (var i = 0; i < langs.length; i++) {
+        var l = String(langs[i]).toLowerCase().slice(0, 2);
+        if (l === 'fr') break;
+        if (l === 'en') { target = '/en/'; break; }
+      }
+      location.replace(target);
+    </script>
+  </head>
+  <body>
+    <p><a href="/fr/">Français</a> · <a href="/en/">English</a></p>
+  </body>
 </html>

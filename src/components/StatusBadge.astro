@@ -1,0 +1,19 @@
+---
+import { useUi, type Lang } from '../i18n/ui';
+
+interface Props { lang: Lang; status: 'live' | 'wip' | 'done'; class?: string }
+const { lang, status, class: className } = Astro.props;
+const t = useUi(lang).project;
+const label = { live: t.live, wip: t.wip, done: t.done }[status];
+// Texte en couleur d'encre (contraste AA) ; la couleur de statut passe par la bordure et le point.
+const tone = {
+  live: 'border-live/60',
+  wip: 'border-wip/70',
+  done: 'border-line'
+}[status];
+const dot = { live: 'bg-live', wip: 'bg-wip pulse-dot', done: 'bg-muted' }[status];
+---
+<span class:list={['inline-flex items-center gap-2 rounded-full border bg-surface px-3 py-1 font-mono text-xs font-medium text-ink', tone, className]}>
+  <span class:list={['size-2 rounded-full', dot]} aria-hidden="true"></span>
+  {label}
+</span>

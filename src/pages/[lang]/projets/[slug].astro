@@ -1,0 +1,14 @@
+---
+import type { GetStaticPaths } from 'astro';
+import CaseStudy from '../../../components/CaseStudy.astro';
+import { getProjects } from '../../../lib/projects';
+
+// Segment « projets » : uniquement pour la langue « fr » (voir segments dans src/i18n/ui.ts).
+export const getStaticPaths = (async () => {
+  const projects = await getProjects('fr');
+  return projects.map((p) => ({ params: { lang: 'fr', slug: p.slug } }));
+}) satisfies GetStaticPaths;
+
+const { slug } = Astro.params;
+---
+<CaseStudy lang="fr" slug={slug!} />
