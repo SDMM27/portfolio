@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* Design tokens — shared contract between layout/pages and interactive demos.
+   Demos read these through CSS custom properties (getComputedStyle), so keep the names stable. */
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  --bg: #f6f3ec;
+  --surface: #fffdf8;
+  --surface-2: #ece7dc;
+  --ink: #16130f;
+  --muted: #6b655c;
+  --line: #d9d2c4;
+  --accent: #ff4f1a;
+  --accent-ink: #ffffff;
+  --accent-2: #2f5bff;
+  --live: #1a9d55;
+  --wip: #c98a00;
+  --radius: 1.25rem;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f0e0c;
+    --surface: #181614;
+    --surface-2: #23201c;
+    --ink: #f3efe6;
+    --muted: #a39b8e;
+    --line: #34302a;
+    --accent: #ff6a3d;
+    --accent-ink: #120a06;
+    --accent-2: #7d97ff;
+    --live: #3ccf7f;
+    --wip: #f0b429;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f0e0c;
+  --surface: #181614;
+  --surface-2: #23201c;
+  --ink: #f3efe6;
+  --muted: #a39b8e;
+  --line: #34302a;
+  --accent: #ff6a3d;
+  --accent-ink: #120a06;
+  --accent-2: #7d97ff;
+  --live: #3ccf7f;
+  --wip: #f0b429;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-2: var(--accent-2);
+  --color-live: var(--live);
+  --color-wip: var(--wip);
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --radius-card: var(--radius);
+}
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

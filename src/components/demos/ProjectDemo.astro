@@ -1,0 +1,6 @@
+---
+// Owned by the interactive-demos work. Renders the live mini-demo for a project card.
+interface Props { slug: string; class?: string }
+const { slug, class: className } = Astro.props;
+---
+<div class:list={["demo-frame", className]} data-demo={slug} aria-hidden="true"></div>
