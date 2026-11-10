@@ -1,0 +1,70 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CommandPalette from '../components/CommandPalette.astro';
+import { useUi, languages, type Lang } from '../i18n/ui';
+import { site } from '../data/site';
+import type { Alternates } from '../lib/seo';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  alternates: Alternates;
+  type?: 'website' | 'article';
+}
+const { lang, title, description, alternates, type = 'website' } = Astro.props;
+const t = useUi(lang);
+const abs = (path: string) => new URL(path, Astro.site ?? site.url).toString();
+const canonical = abs(alternates[lang]);
+const ogLocale = { fr: 'fr_FR', en: 'en_US' } as const;
+const fontsHref =
+  'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400..800&family=Inter:wght@400..600&family=JetBrains+Mono:wght@400..500&display=swap';
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {languages.map((l) => <link rel="alternate" hreflang={l} href={abs(alternates[l])} />)}
+    <link rel="alternate" hreflang="x-default" href={abs(alternates.fr)} />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content={ogLocale[lang]} />
+    {languages.filter((l) => l !== lang).map((l) => <meta property="og:locale:alternate" content={ogLocale[l]} />)}
+    <meta name="twitter:card" content="summary" />
+    <meta name="theme-color" content="#ff4f1a" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href={fontsHref} />
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body class="min-h-screen bg-bg font-sans text-ink">
+    <a href="#main" class="sr-only z-50 rounded-lg bg-accent px-4 py-3 font-medium text-accent-ink focus:not-sr-only focus:fixed focus:left-4 focus:top-4">{t.skip}</a>
+    <Header lang={lang} alternates={alternates} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+    <CommandPalette lang={lang} alternates={alternates} />
+    <script>
+      import { init } from '../client/main';
+      init('Achievement unlocked: curious developer 🏆');
+    </script>
+  </body>
+</html>

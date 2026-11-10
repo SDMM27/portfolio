@@ -1,0 +1,177 @@
+---
+import { useUi, homeUrl, projectUrl, type Lang } from '../i18n/ui';
+import { getProjects } from '../lib/projects';
+import { site } from '../data/site';
+import type { Alternates } from '../lib/seo';
+
+interface Props { lang: Lang; alternates: Alternates }
+const { lang, alternates } = Astro.props;
+const t = useUi(lang);
+const otherLang: Lang = lang === 'fr' ? 'en' : 'fr';
+const projects = await getProjects(lang);
+
+const items = [
+  ...(['projects', 'stack', 'path', 'contact'] as const).map((id) => ({
+    group: 'go', label: t.nav[id], href: homeUrl(lang, `#${id}`), keywords: id
+  })),
+  ...projects.map((p) => ({
+    group: 'projects', label: p.data.title, hint: p.data.tagline, href: projectUrl(lang, p.slug), keywords: p.data.stack.join(' ')
+  })),
+  { group: 'actions', label: t.palette.switchLang, href: alternates[otherLang], keywords: 'language langue fr en' },
+  { group: 'actions', label: t.palette.toggleTheme, action: 'theme', keywords: 'theme dark light sombre clair' },
+  { group: 'actions', label: t.palette.openGithub, href: site.github, external: true, keywords: 'github code' }
+];
+const data = { items, groups: t.palette.groups, empty: t.palette.empty };
+---
+<dialog class="palette" id="palette" aria-label={t.palette.label}>
+  <div class="flex items-center gap-3 border-b border-line px-4">
+    <svg aria-hidden="true" class="size-5 shrink-0 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input
+      id="palette-input"
+      type="text"
+      role="combobox"
+      aria-expanded="true"
+      aria-controls="palette-list"
+      aria-autocomplete="list"
+      autocomplete="off"
+      spellcheck="false"
+      placeholder={t.palette.placeholder}
+      aria-label={t.palette.label}
+      class="h-14 min-w-0 flex-1 bg-transparent text-base text-ink placeholder:text-muted focus:outline-none"
+    />
+    <button type="button" data-palette-close class="grid h-11 min-w-11 place-items-center rounded-lg px-2 font-mono text-xs text-muted hover:text-ink" aria-label={t.palette.close}>Esc</button>
+  </div>
+  <ul id="palette-list" role="listbox" aria-label={t.palette.label} class="max-h-[50vh] overflow-y-auto p-2"></ul>
+  <p class="border-t border-line px-4 py-2 font-mono text-xs text-muted">{t.palette.hint}</p>
+  <script type="application/json" id="palette-data" set:html={JSON.stringify(data)} />
+</dialog>
+
+<script>
+  import { toggleTheme } from '../client/theme';
+
+  type Item = { group: string; label: string; hint?: string; href?: string; external?: boolean; action?: string; keywords?: string };
+  const dialog = document.getElementById('palette') as HTMLDialogElement | null;
+  const input = document.getElementById('palette-input') as HTMLInputElement | null;
+  const list = document.getElementById('palette-list');
+  const raw = document.getElementById('palette-data')?.textContent;
+
+  if (dialog && input && list && raw && typeof dialog.showModal === 'function') {
+    const { items, groups, empty } = JSON.parse(raw) as { items: Item[]; groups: Record<string, string>; empty: string };
+    const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    let shown: Item[] = [];
+    let active = 0;
+    let opener: HTMLElement | null = null;
+
+    const render = () => {
+      list.replaceChildren();
+      if (!shown.length) {
+        const li = document.createElement('li');
+        li.className = 'px-3 py-6 text-center text-sm text-muted';
+        li.textContent = empty;
+        list.append(li);
+        input.removeAttribute('aria-activedescendant');
+        return;
+      }
+      let lastGroup = '';
+      shown.forEach((item, i) => {
+        if (item.group !== lastGroup) {
+          lastGroup = item.group;
+          const h = document.createElement('li');
+          h.setAttribute('role', 'presentation');
+          h.className = 'px-3 pb-1 pt-3 font-mono text-xs uppercase tracking-wider text-muted';
+          h.textContent = groups[item.group] ?? item.group;
+          list.append(h);
+        }
+        const li = document.createElement('li');
+        li.id = `palette-opt-${i}`;
+        li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', String(i === active));
+        li.className = 'palette-item flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-3 py-2';
+        const mark = document.createElement('span');
+        mark.className = 'palette-mark size-1.5 shrink-0 rounded-full bg-line';
+        const text = document.createElement('span');
+        text.className = 'min-w-0 flex-1';
+        const label = document.createElement('span');
+        label.className = 'block truncate text-sm font-medium text-ink';
+        label.textContent = item.label;
+        text.append(label);
+        if (item.hint) {
+          const hint = document.createElement('span');
+          hint.className = 'block truncate text-xs text-muted';
+          hint.textContent = item.hint;
+          text.append(hint);
+        }
+        li.append(mark, text);
+        li.addEventListener('pointermove', () => setActive(i, false));
+        li.addEventListener('click', () => run(item));
+        list.append(li);
+      });
+      input.setAttribute('aria-activedescendant', `palette-opt-${active}`);
+    };
+
+    const setActive = (i: number, scroll = true) => {
+      if (i === active || !shown.length) return;
+      list.querySelector(`#palette-opt-${active}`)?.setAttribute('aria-selected', 'false');
+      active = (i + shown.length) % shown.length;
+      const el = list.querySelector(`#palette-opt-${active}`);
+      el?.setAttribute('aria-selected', 'true');
+      input.setAttribute('aria-activedescendant', `palette-opt-${active}`);
+      if (scroll) el?.scrollIntoView({ block: 'nearest' });
+    };
+
+    const filter = () => {
+      const q = norm(input.value.trim());
+      shown = q ? items.filter((it) => norm(`${it.label} ${it.hint ?? ''} ${it.keywords ?? ''}`).includes(q)) : items;
+      active = 0;
+      render();
+    };
+
+    const run = (item: Item) => {
+      dialog.close();
+      if (item.action === 'theme') toggleTheme();
+      else if (item.href) {
+        if (item.external) window.open(item.href, '_blank', 'noopener');
+        else location.href = item.href;
+      }
+    };
+
+    const open = () => {
+      if (dialog.open) return;
+      opener = document.activeElement as HTMLElement | null;
+      input.value = '';
+      filter();
+      dialog.showModal();
+      input.focus();
+    };
+
+    document.querySelectorAll('[data-palette-open]').forEach((b) => b.addEventListener('click', open));
+    dialog.querySelector('[data-palette-close]')?.addEventListener('click', () => dialog.close());
+    // Clic sur le fond (hors du contenu) : fermer
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('close', () => opener?.focus());
+    input.addEventListener('input', filter);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); }
+      else if (e.key === 'Home') { e.preventDefault(); setActive(0); }
+      else if (e.key === 'End') { e.preventDefault(); setActive(shown.length - 1); }
+      else if (e.key === 'Enter' && shown[active]) { e.preventDefault(); run(shown[active]); }
+    });
+    // Focus trap : le dialog modal rend le reste inerte ; Tab boucle entre le champ et le bouton de fermeture
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      const focusables = [input, dialog.querySelector<HTMLElement>('[data-palette-close]')!];
+      const idx = focusables.indexOf(document.activeElement as HTMLElement);
+      e.preventDefault();
+      focusables[(idx + (e.shiftKey ? -1 : 1) + focusables.length) % focusables.length].focus();
+    });
+    addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        dialog.open ? dialog.close() : open();
+      }
+    });
+  }
+</script>

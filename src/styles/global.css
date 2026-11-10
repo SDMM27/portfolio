@@ -97,3 +97,117 @@ body {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Ajouts du portfolio (les tokens ci-dessus ne changent pas)
+   ------------------------------------------------------------------------ */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 0.375rem;
+}
+
+/* Apparition au scroll : actif seulement quand JS a posé la classe .js */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: calc(var(--i, 0) * 70ms);
+}
+.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* Tilt 3D des cartes : variables posées par src/client/tilt.ts, uniquement au pointeur fin */
+.tilt {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.18s ease-out, box-shadow 0.2s ease, border-color 0.2s ease;
+  will-change: transform;
+}
+
+/* Point pulsé du badge « en développement » */
+@keyframes pulse-dot {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--wip) 60%, transparent); }
+  70% { box-shadow: 0 0 0 7px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+.pulse-dot { animation: pulse-dot 1.8s ease-out infinite; }
+
+/* Icône du bouton de thème : soleil en sombre (pour passer au clair), lune en clair */
+.theme-sun { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-sun { display: block; }
+  :root:not([data-theme="light"]) .theme-moon { display: none; }
+}
+:root[data-theme="dark"] .theme-sun { display: block; }
+:root[data-theme="dark"] .theme-moon { display: none; }
+
+/* Toast (easter egg) */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  z-index: 70;
+  max-width: calc(100vw - 2rem);
+  transform: translate(-50%, 1rem);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+.toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+
+/* Palette de commandes */
+dialog.palette {
+  margin: 12vh auto auto;
+  padding: 0;
+  width: min(36rem, calc(100vw - 2rem));
+  max-height: 70vh;
+  overflow: hidden;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.45);
+}
+dialog.palette::backdrop { background: rgb(10 8 6 / 0.55); backdrop-filter: blur(3px); }
+.palette-item[aria-selected="true"] { background: var(--surface-2); }
+.palette-item[aria-selected="true"] .palette-mark { background: var(--accent); }
+
+/* Prose des études de cas : sobre et lisible */
+.prose-case { font-size: 1.0625rem; line-height: 1.75; color: var(--ink); max-width: 68ch; }
+.prose-case > * + * { margin-top: 1.1em; }
+.prose-case h2 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin-top: 2.4em;
+  padding-top: 1.2em;
+  border-top: 1px solid var(--line);
+}
+.prose-case h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.prose-case h3 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; margin-top: 1.8em; }
+.prose-case p, .prose-case li { overflow-wrap: anywhere; }
+.prose-case ul, .prose-case ol { padding-left: 1.3em; }
+.prose-case ul { list-style: disc; }
+.prose-case ol { list-style: decimal; }
+.prose-case li + li { margin-top: 0.55em; }
+.prose-case li::marker { color: var(--accent); }
+.prose-case strong { font-weight: 600; }
+.prose-case a { color: var(--accent-2); text-decoration: underline; text-underline-offset: 3px; }
+.prose-case a:hover { text-decoration-thickness: 2px; }
+.prose-case code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 0.375rem;
+  padding: 0.1em 0.4em;
+}
+.prose-case em { color: var(--muted); }
