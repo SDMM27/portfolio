@@ -5,8 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  // TODO: remplacer par l'URL de production (canonical, hreflang, OpenGraph).
-  site: 'https://example.com',
+  site: 'https://sacha-don.vercel.app',
   i18n: {
     locales: ['fr', 'en'],
     defaultLocale: 'fr',
