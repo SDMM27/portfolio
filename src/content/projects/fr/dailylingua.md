@@ -1,6 +1,6 @@
 ---
 title: DailyLingua
-tagline: "Une mission linguistique quotidienne bâtie sur de vrais contenus (presse, flux RSS), adaptée à ton niveau."
+tagline: "Des missions de langue quotidiennes à partir de contenus authentiques. Vous pouvez déjà essayer DailyLingua, dont la refonte en cours introduira un nouveau système d’apprentissage pour tous les niveaux."
 status: live
 featured: true
 order: 3
@@ -18,6 +18,8 @@ highlights:
 ---
 
 ## Le problème
+
+Vous avez essayé Duolingo et vous avez l’impression de ne plus progresser ? Ça arrive. C’est pour vous que j’ai créé DailyLingua !
 
 Les applications de langues reposent souvent sur des phrases fabriquées. Apprendre à partir de contenus réels (articles de presse, flux de sites) est plus motivant, mais demande de choisir, adapter et transformer ces contenus en exercices, tous les jours. Je voulais automatiser cette préparation sans perdre la maîtrise de ce que l'app affiche.
 
