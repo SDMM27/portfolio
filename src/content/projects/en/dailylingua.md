@@ -1,6 +1,6 @@
 ---
 title: DailyLingua
-tagline: "A daily language mission built on real content (press, RSS feeds), adapted to your level."
+tagline: "Daily language missions built around authentic content. You can already try DailyLingua while a major overhaul is underway to introduce a new learning system for all levels."
 status: live
 featured: true
 order: 3
@@ -18,6 +18,8 @@ highlights:
 ---
 
 ## The problem
+
+Have you tried Duolingo and felt like you stopped making progress? It happens. I built DailyLingua for you!
 
 Language apps often rely on made-up sentences. Learning from real content (news articles, site feeds) is more motivating, but it means choosing, adapting and turning that content into exercises every single day. I wanted to automate that preparation without losing control over what the app displays.
 
